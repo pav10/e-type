@@ -1,0 +1,103 @@
+// ====================================================================
+// rank96_leech_tensor.magma
+// CORRECTED target wiring.  Gram24 = Leech as Hermitian Z[w]-lattice
+// (rank 12, a vartheta-lattice: trace = unimodular Leech) is the natural
+// "P_i" factor for a UNIMODULAR Hermitian tensor -- NOT for the rank-84
+// 3-modular target (rank 12 does not divide 42, and the modularity type
+// is wrong).  Here it drives the rank-96 even unimodular line:
+//
+//     L_96  =  trace( Leech_{Z[w]}  (x)_{Z[w]}  U )
+//   with U a HERMITIAN-UNIMODULAR Z[w]-lattice of rank 4 (d_U = 1).
+//   Hermitian rank 12*4 = 48  ->  Z-rank 96.
+//
+// Determinant check (verified in Python against the Gamma_72 recipe):
+//   det(trace) = |d_K|^{m} * d_{L(x)U}^2 = 3^{48} * (3^{-6})^{2*4} = 1.   ✓
+//   So the trace lattice is even unimodular of rank 96 for ANY such U.
+//
+// HONEST STATUS: rank-96 minimum-10 (extremal even unimodular) is an OPEN
+// problem.  This wiring gives a unimodular lattice for free; the minimum
+// is the wall, and -- as the Coulangeon driver below makes explicit -- the
+// naive bricks do NOT reach 10.  Two missing ingredients are flagged:
+//   (1) the rank-4 Hermitian-UNIMODULAR Z[w] brick U (d_U=1, trace = a
+//       3-modular rank-8 lattice).  NOT in the Hentschel files retrieved
+//       (those are all vartheta-lattices, d_L = 3^{-m/2}).  Source: Nebe's
+//       Catalogue of Lattices / a Hermitian Voronoi computation.
+//   (2) the minimal-determinant sequence d_r(Leech_{Z[w]}) for r=1..4.
+//       Only d_1 = 2 is filled in below; d_2,d_3,d_4 need computation.
+// ====================================================================
+
+d := 3;
+S<w> := QuadraticField(-d);     // w = sqrt(-3); half-trace form x.y=(1/2)Tr h(x,y)
+
+// ---- Leech as Hermitian Z[w]-lattice (Hentschel Gram24, 1/3-scaled) -------
+LeechHerm := (1/3)*Matrix(S,[
+[12,-6,-2*w+6,w-3,-w-3,-2*w-6,-6,w-3,w+3,0,2*w,2*w-6],
+[-6,12,2*w-6,-w-3,6,2*w+6,-w+3,-w-3,-2*w-6,3*w-3,-w+3,-w+3],
+[2*w+6,-2*w-6,12,w-3,-w-3,-3*w-3,w-3,0,2*w,-2*w,2*w-6,2*w-6],
+[-w-3,w-3,-w-3,12,w+3,0,6,0,6,0,-w-3,6],
+[w-3,6,w-3,-w+3,12,6,-w+3,-3*w-3,-w-3,3*w-3,-w-3,-w+3],
+[2*w-6,-2*w+6,3*w-3,0,6,12,-w+3,-2*w,w-3,2*w,-2*w,-3*w+3],
+[-6,w+3,-w-3,6,w+3,w+3,12,-w-3,w+3,w-3,0,6],
+[-w-3,w-3,0,0,3*w-3,2*w,w-3,12,-w-3,-2*w,-2*w,0],
+[-w+3,2*w-6,-2*w,6,w-3,-w-3,-w+3,w-3,12,-w+3,0,0],
+[0,-3*w-3,2*w,0,-3*w-3,-2*w,-w-3,2*w,w+3,12,-2*w,-w-3],
+[-2*w,w+3,-2*w-6,w-3,w-3,2*w,0,2*w,0,2*w,12,-w+3],
+[-2*w-6,w+3,-2*w-6,6,w+3,3*w+3,6,0,0,w-3,w+3,12]]);
+// Verified (Python): Hermitian, half-trace det 1, Hermitian min d_1 = 2.
+
+// ---- TODO: the rank-4 Hermitian-unimodular Z[w] brick U (d_U = 1) ----------
+// U := Matrix(S,[ ... ]);   // rank 4, U = U^# (Hermitian unimodular),
+//                           // trace = 3-modular rank-8 lattice, det 3^4.
+// Get from Nebe's catalogue or a rank-4 Hermitian Voronoi run; NOT in the
+// Hentschel vartheta-files.  Without it the tensor cannot be instantiated.
+
+// ---- Hermitian tensor + trace -> Z-lattice (half-trace convention) ---------
+function HalfTraceGram(H)
+    n := Nrows(H); B := [];
+    for i in [1..n] do Append(~B,<i,S!1>); Append(~B,<i,w>); end for;
+    m := #B; G := ZeroMatrix(Rationals(), m, m);
+    for r in [1..m] do i:=B[r][1]; si:=B[r][2];
+        for c in [1..m] do j:=B[c][1]; sj:=B[c][2];
+            G[r,c] := (1/2)*Trace(H[i,j]*si*Conjugate(sj));   // (1/2)Tr
+        end for;
+    end for;
+    return G;
+end function;
+
+// ---- Coulangeon minimum bound (1201.1832 Prop 3.3):  h(z,z) >= r dr(L)^{1/r} dr(M)^{1/r}
+// Target: extremal even unimodular rank 96 has Z-min 10, i.e. Hermitian min d_1 = 5.
+TARGET_HERM_MIN := 5;
+
+function CoulangeonBound(dL, dM)   // dL,dM : [d_1,..,d_t] Hermitian minimal determinants
+    t := Min(#dL,#dM); lb := Infinity(); rmin := 0;
+    for r in [1..t] do
+        v := r*(Real(dL[r])^(1/r))*(Real(dM[r])^(1/r));
+        if v lt lb then lb := v; rmin := r; end if;
+    end for;
+    return lb, rmin;
+end function;
+
+// ---- What the bound gives with the data we actually have -------------------
+// Leech_{Z[w]} minimal determinants (Hermitian):  d_1 = 2 (known).
+//   d_2,d_3,d_4 UNKNOWN here -> must be computed (Hermitian short vectors).
+// Even just d_1: a PURE TENSOR v(x)w has h = d_1(L)*d_1(U).  If U has
+// Hermitian min 1 (e.g. trace 3-modular min 2), then min(L(x)U) <= 2*1 = 2,
+// i.e. Z-min <= 4  --  far below the extremal 10.  THIS is the open problem:
+// the split (rank-1) vectors are already too short, and no choice of rank-4 U
+// is known to push every shell up to Z-min 10.
+procedure ShowGap(d1_Leech, d1_U)
+    printf "pure-tensor (rank-1) Hermitian norm = d1(Leech)*d1(U) = %o*%o = %o\n",
+           d1_Leech, d1_U, d1_Leech*d1_U;
+    printf "  => Z-min <= %o   (extremal target is 10)\n", 2*d1_Leech*d1_U;
+    if 2*d1_Leech*d1_U lt 10 then
+        printf "  GAP: split vectors already below 10 -> not extremal with these bricks.\n";
+    end if;
+end procedure;
+
+ShowGap(2, 1);   // Leech d_1 = 2 ; a min-2-trace rank-4 U has Hermitian d_1 = 1
+
+print "";
+print "Loaded rank96_leech_tensor skeleton (Gram24 embedded & verified).";
+print "Blocked on: rank-4 Hermitian-unimodular Z[w] brick U, and the d_r(Leech)";
+print "sequence. Even so, the split-vector bound shows the tensor route does not";
+print "reach Z-min 10 -- consistent with rank-96 extremality being OPEN.";

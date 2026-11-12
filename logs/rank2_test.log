@@ -1,0 +1,46 @@
+survivors: [30, 81, 82, 93, 109, 136, 149, 160, 259, 260, 318, 364, 366]
+   40 / 98280 short vectors, 52 / 66 section types
+   0 section pairs pass the determinant bound; smallest norm found: None
+Leech#30 (m=28): 0 killing section pairs, best None   (17s) []
+   40 / 98280 short vectors, 52 / 66 section types
+   0 section pairs pass the determinant bound; smallest norm found: None
+Leech#81 (m=28): 0 killing section pairs, best None   (16s) []
+   40 / 98280 short vectors, 52 / 66 section types
+   0 section pairs pass the determinant bound; smallest norm found: None
+Leech#82 (m=28): 0 killing section pairs, best None   (18s) []
+   40 / 98280 short vectors, 52 / 71 section types
+   16 section pairs pass the determinant bound; smallest norm found: 8.0
+Leech#93 (m=21): 4 killing section pairs, best 8.0   (18s) [((3, 3, Fraction(-1, 1), Fraction(1, 1)), (2, 2, Fraction(17, 19), Fraction(-15, 19)), 8.0), ((3, 3, Fraction(0, 1), Fraction(-1, 1)), (2, 2, Fraction(17, 19), Fraction(-15, 19)), 8.0)]
+   40 / 98280 short vectors, 52 / 66 section types
+   0 section pairs pass the determinant bound; smallest norm found: None
+Leech#109 (m=28): 0 killing section pairs, best None   (22s) []
+   40 / 98280 short vectors, 52 / 78 section types
+   204 section pairs pass the determinant bound; smallest norm found: 8.0
+Leech#136 (m=28): 80 killing section pairs, best 8.0   (25s) [((3, 3, Fraction(-1, 1), Fraction(1, 1)), (2, 2, Fraction(-26, 19), Fraction(14, 19)), 8.0), ((3, 3, Fraction(-1, 1), Fraction(1, 1)), (2, 2, Fraction(-17, 19), Fraction(15, 19)), 8.0)]
+   40 / 98280 short vectors, 52 / 66 section types
+   0 section pairs pass the determinant bound; smallest norm found: None
+Leech#149 (m=28): 0 killing section pairs, best None   (18s) []
+   40 / 98280 short vectors, 52 / 66 section types
+   0 section pairs pass the determinant bound; smallest norm found: None
+Leech#160 (m=28): 0 killing section pairs, best None   (16s) []
+   40 / 98280 short vectors, 52 / 66 section types
+   0 section pairs pass the determinant bound; smallest norm found: None
+Leech#259 (m=28): 0 killing section pairs, best None   (16s) []
+   40 / 98280 short vectors, 52 / 66 section types
+   0 section pairs pass the determinant bound; smallest norm found: None
+Leech#260 (m=28): 0 killing section pairs, best None   (22s) []
+   40 / 98280 short vectors, 52 / 74 section types
+   64 section pairs pass the determinant bound; smallest norm found: 8.0
+Leech#318 (m=21): 16 killing section pairs, best 8.0   (23s) [((3, 3, Fraction(-1, 1), Fraction(1, 1)), (2, 2, Fraction(-17, 19), Fraction(15, 19)), 8.0), ((3, 3, Fraction(-1, 1), Fraction(1, 1)), (2, 2, Fraction(-2, 19), Fraction(-15, 19)), 8.0)]
+   40 / 98280 short vectors, 52 / 66 section types
+   0 section pairs pass the determinant bound; smallest norm found: None
+Leech#364 (m=13): 0 killing section pairs, best None   (17s) []
+   40 / 98280 short vectors, 52 / 66 section types
+   0 section pairs pass the determinant bound; smallest norm found: None
+Leech#366 (m=28): 0 killing section pairs, best None   (17s) []
+   40 / 98280 short vectors, 52 / 76 section types
+   96 section pairs pass the determinant bound; smallest norm found: 8.0
+Leech#0 (m=13): 24 killing section pairs, best 8.0   (18s) [((3, 3, Fraction(-1, 1), Fraction(1, 1)), (2, 2, Fraction(-17, 19), Fraction(15, 19)), 8.0), ((3, 3, Fraction(-1, 1), Fraction(1, 1)), (2, 2, Fraction(-8, 19), Fraction(16, 19)), 8.0)]
+   40 / 98280 short vectors, 52 / 74 section types
+   64 section pairs pass the determinant bound; smallest norm found: 8.0
+Leech#1 (m=13): 16 killing section pairs, best 8.0   (22s) [((3, 3, Fraction(-1, 1), Fraction(1, 1)), (2, 2, Fraction(-17, 19), Fraction(15, 19)), 8.0), ((3, 3, Fraction(-1, 1), Fraction(1, 1)), (2, 2, Fraction(-2, 19), Fraction(-15, 19)), 8.0)]

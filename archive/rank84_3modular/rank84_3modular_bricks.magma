@@ -1,0 +1,118 @@
+// ====================================================================
+// rank84_3modular_bricks.magma
+// CORRECT bricks for the rank-84 extremal 3-modular target, generated
+// NATIVELY in Magma (do NOT hand-transcribe the Hermitian Grams -- the
+// complex structure is easy to get subtly wrong; let Magma build it from
+// the reflection group, which is authoritative).
+//
+//   K12  (Coxeter-Todd) : Hermitian rank 6 over Z[w], 3-modular, det 729
+//   G2(3) = [+-G2(3)]_14 : Hermitian rank 7 over Z[w], 3-modular
+//   tensor: Hermitian rank 6*7 = 42  ->  Z-rank 84, det 3^42 (3-modular).
+//
+// Both are HERMITIAN-UNIMODULAR (L = L^#, d_L = 1), so the tensor is too,
+// and its trace is 3-modular of rank 84 -- verified by rank/det arithmetic
+// in Python:  det(trace) = 3^42, MODULAR = 3.
+//
+// Extremal minimum target: Z-min 16  <=>  Hermitian min d_1 = 8.
+// ====================================================================
+
+d := 3;
+S<w> := QuadraticField(-d);
+
+// -------------------------------------------------------------------
+// 1. K12 over Z[w], via the Shephard-Todd reflection group #34 (Mitchell
+//    group 6.PSU4(3).2). InvariantForms gives the scaled Coxeter-Todd
+//    Hermitian Gram directly. (Documented in the Magma lattice DB handbook.)
+// -------------------------------------------------------------------
+G34  := ShephardTodd(34);            // complex reflection group, acts on C^6
+IF34 := InvariantForms(G34);
+K12H := IF34[1];                     // Hermitian rank-6 Gram of K12 over Q(w)
+// sanity: automorphism group should match the Mitchell group
+// A := HermitianAutomorphismGroup(K12H); assert IsIsomorphic(A, G34);
+printf "K12: Hermitian rank %o\n", Nrows(K12H);
+
+// -------------------------------------------------------------------
+// 2. G2(3) lattice = [+-G2(3)]_14, Hermitian rank 7 over Z[w].
+//    Two routes (pick whichever your Magma build supports):
+//   (a) From its automorphism group G2(3) acting on a rank-7 Hermitian module
+//       -- construct the matrix group over Z[w] and take InvariantForms.
+//   (b) Import the integral rank-14 Gram from Nebe's catalogue
+//       (PROPERTIES MODULAR=3) and descend along the order-3 isometry
+//       (its SIMILARITY matrix S has min poly x^2+3, i.e. S = sqrt(-3));
+//       then h_ij = (e_i,e_j) + (S e_i, e_j)/sqrt(-3) on a genuine Z[w]-basis.
+//   NOTE: route (b) requires a CORRECT Z[w]-basis (a set {b_i} with
+//   {b_i, S b_i} a Z-basis); the naive standard basis is degenerate.
+//   Recommended: route (a) or Magma's HermitianLattice / Kneser tooling.
+//
+// G2_3_H := ... ;                   // Hermitian rank-7 Gram over Q(w), d_L=1
+
+// -------------------------------------------------------------------
+// 3. Hermitian tensor and the half-trace Z-lattice
+// -------------------------------------------------------------------
+function HalfTraceGram(H)
+    n := Nrows(H); B := [];
+    for i in [1..n] do Append(~B,<i,S!1>); Append(~B,<i,w>); end for;
+    m := #B; G := ZeroMatrix(Rationals(), m, m);
+    for r in [1..m] do i:=B[r][1]; si:=B[r][2];
+        for c in [1..m] do j:=B[c][1]; sj:=B[c][2];
+            G[r,c] := (1/2)*Trace(H[i,j]*si*Conjugate(sj));
+        end for;
+    end for;
+    return G;
+end function;
+
+// R := TensorProduct(K12H, G2_3_H);     // Hermitian rank 42 over Z[w]
+// Gt := HalfTraceGram(R);
+// L  := LatticeWithGram(LLLGram(ChangeRing(Denominator-cleared Gt, Integers())));
+// assert Determinant(L) eq 3^42;        // 3-modular check
+// printf "Z-rank %o, det %o\n", Rank(L), Determinant(L);
+
+// -------------------------------------------------------------------
+// 4. Minimum certification via Coulangeon (1201.1832 Prop 3.3):
+//      h(z,z) >= r * d_r(K12)^{1/r} * d_r(G2(3))^{1/r}   for z of rank r.
+//    Need d_r for r = 1..6.  d_1(K12) = 2 (Hermitian min; Z-min 4).
+//    Euclidean min of Z[w] is mu = 1/3, so Prop 3.5: d_2 >= (2/3) m^2.
+//    Target: all r give h >= 8  =>  Z-min >= 16 (EXTREMAL).
+// -------------------------------------------------------------------
+TARGET_HERM_MIN := 8;
+function CoulangeonBound(dr_A, dr_B)
+    t := Min(#dr_A,#dr_B); lb := Infinity(); rmin := 0;
+    for r in [1..t] do
+        v := r*(Real(dr_A[r])^(1/r))*(Real(dr_B[r])^(1/r));
+        if v lt lb then lb := v; rmin := r; end if;
+    end for;
+    return lb, rmin;
+end function;
+
+// Honest gap check with only d_1 known (pure tensor / rank-1 vectors):
+//   h(pure) = d_1(K12) * d_1(G2(3)).  K12 Z-min 4 -> Hermitian d_1 = 2.
+//   G2(3) Z-min 4 -> Hermitian d_1 = 2.  Pure-tensor h = 2*2 = 4 -> Z-min 8.
+//   8 < 16: split vectors are too short UNLESS the higher-rank minima and the
+//   actual minimal-vector geometry push the true minimum up. This is exactly
+//   the d_r-sequence computation that decides extremality -- the open work.
+printf "pure-tensor Hermitian norm d1(K12)*d1(G2(3)) = 2*2 = 4 -> Z-min <= 8\n";
+printf "  (extremal needs 16; whether the minimum REACHES the target is the\n";
+printf "   question the full d_r-based Coulangeon bound must settle.)\n";
+
+print "Loaded rank84_3modular_bricks skeleton.";
+print "Next: supply G2(3) Hermitian Gram (route a/b), compute d_r sequences,";
+print "      run CoulangeonBound([d_r K12],[d_r G2(3)]) against target 8.";
+
+// ====================================================================
+// HONEST ASSESSMENT (computed, not asserted)
+// --------------------------------------------------------------------
+// Pure (split) tensors v(x)w have Hermitian norm d_1(K12)*d_1(G2(3)) = 2*2
+// = 4, hence Z-norm 8.  But the EXTREMAL rank-84 3-modular minimum is 16.
+// So the split vectors sit at Z-norm 8 -- a factor of 2 BELOW the extremal
+// target.  Unlike Nebe's Gamma_72 (where split = 8 = the extremal value and
+// only non-split vectors had to be controlled UPWARD), here the split
+// vectors themselves already undershoot.  That means K12 (x) G2(3) at this
+// scale is NOT an extremal 3-modular lattice: it has minimum 8, not 16.
+//
+// CONCLUSION: the clean rank-84 = K12 (x) G2(3) tensor gives a 3-modular
+// lattice of MINIMUM 8, not the extremal 16.  Reaching 16 is not a matter
+// of certifying this tensor -- it would require a different construction
+// (a denser pair, a non-split/glued sublattice, or a genuinely new idea).
+// This mirrors the rank-96 situation: the tensor manufactures the right
+// genus for free, but the minimum falls short, and closing it is open.
+// ====================================================================

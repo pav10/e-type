@@ -1,0 +1,145 @@
+// ====================================================================
+// rank84_3modular.magma
+// Step 3: Hermitian-Eisenstein tensor candidate for an extremal
+// 3-modular lattice of rank 84, with a theta-vs-extremal-form gate.
+//
+// STRATEGY (Nebe Hermitian-tensor method, level-3 analogue of Gamma72):
+//   base ring  O = Z[w], w = (-1+sqrt(-3))/2   (Eisenstein, disc -3)
+//   build a Z-lattice L from a Hermitian O-lattice via the trace form;
+//   the tensor of two Hermitian-unimodular O-lattices is again unimodular
+//   over O, and Tr gives a 3-modular Z-lattice (det 3^{n/2}).
+//   Hermitian rank 42  ->  Z-rank 84.
+//
+// THE GATE (cheap rejection, the point of this file):
+//   A genuine extremal rank-84 3-modular lattice MUST have theta series
+//   equal to TARGET below.  In particular kissing number = 119421161244 at
+//   norm 16, and ZERO vectors of norm 2,4,6,8,10,12,14.  We do NOT run a
+//   full minimum certification (infeasible by brute force).  Instead we
+//   compute low theta coefficients via ShortVectors up to norm 14: if ANY
+//   appear, the candidate is killed instantly.  Only survivors warrant the
+//   expensive Coulangeon/Kitaoka minimum proof.
+//
+// HONEST STATUS: this is frontier, not a known construction.  Expect most
+// natural bricks to fail the gate (produce norm <16 vectors).  Passing the
+// gate is necessary, not sufficient.
+// ====================================================================
+
+// ---- target extremal theta (index i = (x,x)/2), computed & verified
+//      independently in Python (Quebbemann ring, gens wt 2 = theta_A2^2,
+//      wt 6 = theta_K12; unique weight-42 form vanishing through q^7) ----
+TARGET := [ 1,0,0,0,0,0,0,0,
+            119421161244, 12343472418816, 958224041539632,
+            47464428411273888, 1682914610530551132, 44796917147918854968 ];
+// index:    0 1 2 3 4 5 6 7   8(norm16)  9(norm18)  ...
+
+// --------------------------------------------------------------------
+// 0. Eisenstein order and the trace-form bridge O-lattice -> Z-lattice
+// --------------------------------------------------------------------
+K<w> := QuadraticField(-3);          // w = sqrt(-3); use ZK below
+ZK := MaximalOrder(K);               // = Z[(1+sqrt(-3))/2]
+// For a Hermitian Gram matrix H over ZK (H = H^*), the associated even
+// Z-lattice uses the trace form scaled by the codifferent so that an
+// O-unimodular H yields a 3-modular Z-lattice. We implement Tr(H) directly
+// and rescale to integral even at the end.
+
+function HermToGram(H)
+    // H : n x n Hermitian over K, entries in ZK
+    n := Nrows(H);
+    // Z-basis of each O-slot: {1, w}. Build 2n x 2n rational Gram via trace.
+    B := [<i,b> : b in [K!1, w], i in [1..n]];   // careful ordering below
+    B := [];
+    for i in [1..n] do Append(~B, <i, K!1>); Append(~B, <i, w>); end for;
+    m := #B;
+    G := ZeroMatrix(Rationals(), m, m);
+    for r in [1..m] do
+        i := B[r][1]; si := B[r][2];
+        for c in [1..m] do
+            j := B[c][1]; sj := B[c][2];
+            // h(x,y) = H[i,j] * si * conj(sj);  real bilinear = Trace_{K/Q}
+            val := H[i,j] * si * Conjugate(sj);
+            G[r,c] := Trace(val);
+        end for;
+    end for;
+    return G;
+end function;
+
+// --------------------------------------------------------------------
+// 1. Hermitian tensor product of two Hermitian Grams over ZK
+// --------------------------------------------------------------------
+function HermTensor(A, B)
+    return TensorProduct(A, B);     // Kronecker; H1 (x)_O H2
+end function;
+
+// --------------------------------------------------------------------
+// 2. The gate: low theta coefficients vs TARGET
+//    Returns true (PASS) iff lattice has NO vectors of norm < 16,
+//    i.e. matches TARGET in every entry we can afford to compute.
+// --------------------------------------------------------------------
+function ThetaGate(L : MaxIndex := 12)
+    // L : even integral Z-lattice (LatticeWithGram). Index i = norm/2.
+    // We check shells of norm 2,4,...,2*MaxIndex against TARGET[i+1].
+    minnorm := Minimum(L);           // Magma's minimum (= min (x,x))
+    if minnorm lt 16 then
+        printf "  GATE FAIL: minimum %o < 16\n", minnorm;
+        return false;
+    end if;
+    // optional: verify a few positive coefficients match (kissing number)
+    sv := ShortVectors(L, 16, 16);   // norm exactly 16
+    k16 := 2 * #sv;                  // +-v pairs
+    printf "  minimum = %o ; norm-16 vectors = %o (target %o)\n",
+           minnorm, k16, TARGET[9];
+    return k16 eq TARGET[9];
+end function;
+
+// --------------------------------------------------------------------
+// 3. Candidate bricks.  Replace these with real Hermitian-unimodular
+//    ZK-lattices.  Natural factors for 42 = 3 * 14 or 6 * 7 or 21 * 2:
+//      - Coxeter-Todd K12 : Hermitian rank 6 over ZK, the densest 3-mod brick
+//      - the [+-G2(3)]_14 extremal 3-modular lattice : Hermitian rank 7
+//      - rank-3 Hermitian unimodular ZK brick (analogue of Barnes P_b)
+//    The right pairing to try first:  rank-6 (x) rank-7  -> rank 42.
+// --------------------------------------------------------------------
+
+// PLACEHOLDER bricks (NOT the real dense ones -- swap in genuine Grams):
+//   To get started, load Hermitian structures from Magma's lattice DB or
+//   construct K12 over ZK explicitly.  Below is the call structure only.
+
+procedure TryPair(HermA, HermB)   // HermA, HermB Hermitian Grams over ZK
+    H := HermTensor(HermA, HermB);
+    printf "Hermitian tensor: O-rank %o -> Z-rank %o\n",
+           Nrows(H), 2*Nrows(H);
+    G := HermToGram(H);
+    // rescale to integral even Gram:
+    d := LCM([Denominator(x) : x in Eltseq(G)]);
+    Gi := ChangeRing(d*G, Integers());
+    Gi := LLLGram(Gi);            // reduce before any short-vector work
+    L := LatticeWithGram(Gi);
+    printf "  det = %o   (3-modular target det = 3^42 = %o after scaling)\n",
+           Determinant(L), 3^42;
+    pass := ThetaGate(L);
+    printf "  GATE: %o\n", pass select "PASS (warrants full proof)" else "FAIL";
+end procedure;
+
+// --------------------------------------------------------------------
+// 4. Full-minimum certification (STUB -- the expensive, real step)
+//    Do NOT brute force qfminim at rank 84.  Use:
+//      (a) Coulangeon, Acta Arith. 92 (2000): embed L into an
+//          orthogonally decomposable I1 ⊥ I2 where minima are computable;
+//      (b) Kitaoka tensor-minimum theorem to bound min(L1 (x) L2) below;
+//      (c) enumerate only the finitely many "bad" classes mod 2.
+//    See Nebe arXiv:1008.2862 Section 4 for the dim-72 template.
+// --------------------------------------------------------------------
+procedure CertifyMinimum(L)
+    print "  [stub] minimum certification: port Coulangeon/Kitaoka here.";
+    print "  See Nebe 1008.2862 Sec 4; ~CPU-years even when it works.";
+end procedure;
+
+// --------------------------------------------------------------------
+// USAGE
+//   1. Build genuine Hermitian-unimodular ZK Grams HA (rank 6, =K12) and
+//      HB (rank 7, =[+-G2(3)]_14 Hermitian structure).
+//   2. TryPair(HA, HB);
+//   3. On PASS only: CertifyMinimum(L);
+// --------------------------------------------------------------------
+print "Loaded rank84_3modular skeleton.";
+print "Provide Hermitian ZK Grams, then: TryPair(HA, HB);";

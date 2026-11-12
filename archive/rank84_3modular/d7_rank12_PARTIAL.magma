@@ -1,0 +1,32 @@
+/*** vartheta-lattices over Q(sqrt-7), Hermitian rank 12 (Z-rank 24).    ***/
+/*** These are the Leech-and-other Hermitian Z[(1+sqrt-7)/2]-structures. ***/
+/*** *** PARTIAL: first ~9 of the full list (file truncated on fetch). ***
+ *** Re-download http://www.matha.rwth-aachen.de/.../d-7rank12.txt for all ***
+ *** Data accessor in original: ErgEXT[j,1..7]. Matrices are Grammatrix/d ***/
+d:=7;
+S<w>:=QuadraticField(-d);
+
+/*** Lattice 0: START0 = GramRank4-block diag x3 (3 copies of the E8-form) ***/
+START0d4:=Matrix(S,[
+[  14,    0,  6*w,  4*w],
+[   0,   14,  4*w, -6*w],
+[-6*w, -4*w,   28,    0],
+[-4*w,  6*w,    0,   28]]);
+/*** then START0 = blockdiag(START0d4,START0d4,START0d4)/7 ***/
+
+Erg1:=1/7*Matrix(S,[
+[ 154 , -8*w - 56 , 6*w + 28 , -4*w , 0 , 0 , 0 , 8*w , 4*w , -12*w , 0 , -67*w - 21 ],
+[ 8*w - 56 , 126 , -4*w - 56 , -6*w , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 9*w + 105 ],
+[ -6*w + 28 , 4*w - 56 , 42 , -28 , 0 , -4*w - 14 , 4*w , 6*w , 0 , 0 , 0 , -3*w - 63 ],
+[ 4*w , 6*w , -28 , 84 , 0 , 8*w + 28 , -8*w , -12*w , 0 , 0 , 0 , 23*w + 63 ],
+[ 0 , 0 , 0 , 0 , 14 , -6*w , 6*w , -4*w , 0 , 0 , 0 , -5*w + 21 ],
+[ 0 , 0 , 4*w - 14 , -8*w + 28 , 6*w , 42 , -4*w - 28 , -6*w , 0 , 0 , 0 , 2*w + 42 ],
+[ 0 , 0 , -4*w , 8*w , -6*w , 4*w - 28 , 56 , 6*w , -10*w , 4*w - 56 , 28*w + 28 , -19*w - 91 ],
+[ -8*w , 0 , -6*w , 12*w , 4*w , 6*w , -6*w , 42 , -14 , 12*w , -6*w + 42 , 36*w - 42 ],
+[ -4*w , 0 , 0 , 0 , 0 , 0 , 10*w , -14 , 28 , -20*w - 14 , 10*w - 70 , -28*w + 28 ],
+[ 12*w , 0 , 0 , 0 , 0 , 0 , -4*w - 56 , -12*w , 20*w - 14 , 126 , -60*w - 28 , 45*w + 175 ],
+[ 0 , 0 , 0 , 0 , 0 , 0 , -28*w + 28 , 6*w + 42 , -10*w - 70 , 60*w - 28 , 224 , 58*w - 196 ],
+[ 67*w - 21 , -9*w + 105 , 3*w - 63 , -23*w + 63 , 5*w + 21 , -2*w + 42 , 19*w - 91 , -36*w - 42 , 28*w + 28 , -45*w + 175 , -58*w - 196 , 756 ]]);
+
+/*** NOTE: Erg2..Erg9 were also retrieved; stored in d7_rank12_more.txt as raw text. ***/
+/*** The full genus has more classes than captured here. ***/
