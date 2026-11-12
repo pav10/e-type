@@ -109,7 +109,7 @@ Counts are ideal-lattice classes, not isometry classes (many coincide).
 | 19 | (6,20), (6,24) | 420 | 840 | 827 (norm 4, 6 or 8) | **13**, all with brick (6,20) |
 | 20 | (6,16) | 359 | 359 | 359 | 0 |
 | 24 | (6,16) | 348 | 348 | 348 | 0 |
-| 23 | (6,8), (6,12), (6,14), (6,16), (6,24), (8,66) | 926 | 5556 | D23_STATUS | 0 so far |
+| 23 | (6,8), (6,12), (6,14), (6,16), (6,24), (8,66) | 926 | 5556 | 3448 of 5556 processed, all killed (run still in progress at time of writing) | 0 so far |
 
 Follow-up on the 13 (d = 19):
 - `scripts/rank2_test.py` (tensors `a₁⊗p₁ + a₂⊗p₂` on sections spanned by minimal
@@ -123,8 +123,8 @@ Follow-up on the 13 (d = 19):
   norm ≤ 8: smallest norm found is **10**, attained on the four sections of
   determinant 4. BKZ up to block 70 on the full lattice also returns 10.
 - Not tested: tensors of rank 3 and 4, and rank-2 tensors on larger sections.
-  So for these 10: **8 ≤ … the minimum is 8 or 10 as far as the tests go**
-  (strictly: no vector of norm < 10 found; 10 is attained).
+  So for these 10 the minimum is **at most 10** (attained) and **no vector of
+  norm < 10 has been found**; whether it is 8 or 10 is open.
 
 Reading: almost all candidates contain a vector of norm ≤ 8 that LLL finds
 immediately (as in Γ72, where the bad Leech structures contain a copy of the
