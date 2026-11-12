@@ -109,7 +109,7 @@ Counts are ideal-lattice classes, not isometry classes (many coincide).
 | 19 | (6,20), (6,24) | 420 | 840 | 827 (norm 4, 6 or 8) | **13**, all with brick (6,20) |
 | 20 | (6,16) | 359 | 359 | 359 | 0 |
 | 24 | (6,16) | 348 | 348 | 348 | 0 |
-| 23 | (6,8), (6,12), (6,14), (6,16), (6,24), (8,66) | 926 | 5556 | 3448 of 5556 processed, all killed (run still in progress at time of writing) | 0 so far |
+| 23 | (6,8), (6,12), (6,14), (6,16), (6,24), (8,66) | 926 | 5556 | 3506 of 5556 processed, all killed (run still in progress at time of writing) | 0 so far |
 
 Follow-up on the 13 (d = 19):
 - `scripts/rank2_test.py` (tensors `a₁⊗p₁ + a₂⊗p₂` on sections spanned by minimal
