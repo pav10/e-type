@@ -178,18 +178,20 @@ def herm_gram(G, J, K, vecs):
 
 
 def ok_basis(G, J, K, bound=None):
-    """An O_K-basis of a Hermitian unimodular lattice made of short vectors
-    (Hermitian Gram determinant 1).  Returns (vectors, exact Gram, complex Gram)."""
+    """An O_K-basis of a free O_K-lattice (Z-data G, J) made of short vectors:
+    v_1..v_m with {v_i, eta v_i} a Z-basis.  Returns (vectors, exact Gram, complex Gram)."""
     from .search import short_vectors
     m = len(G) // 2
     mn = minimum_exact(G)
-    V = short_vectors(G, bound or mn + 2).T.tolist()
-    V.sort(key=lambda v: sum(v[i] * int(G[i, j]) * v[j] for i in range(len(v)) for j in range(len(v))))
-    best = None
-    for comb in itertools.combinations(range(len(V)), m):
-        vecs = [V[i] for i in comb]
-        ex, cx = herm_gram(G, J, K, vecs)
-        dt = np.linalg.det(cx).real
-        if abs(dt - 1) < 1e-6:
-            return vecs, ex, cx
-    raise RuntimeError("no basis among short vectors")
+    Jn = np.array([[int(J[i, j]) for j in range(len(G))] for i in range(len(G))], dtype=np.int64)
+    Gn = np.array([[int(G[i, j]) for j in range(len(G))] for i in range(len(G))], dtype=np.int64)
+    for extra in (2, 6, 12, 20, 40):
+        V = short_vectors(G, (bound or mn) + extra).T
+        V = V[np.argsort(np.einsum("ki,ij,kj->k", V, Gn, V), kind="stable")][:60]
+        for comb in itertools.combinations(range(len(V)), m):
+            M = np.array([w for i in comb for w in (V[i], Jn @ V[i])], dtype=float)
+            if abs(abs(np.linalg.det(M)) - 1) < 1e-6:
+                vecs = [list(map(int, V[i])) for i in comb]
+                ex, cx = herm_gram(G, J, K, vecs)
+                return vecs, ex, cx
+    raise RuntimeError("no O_K-basis among short vectors")

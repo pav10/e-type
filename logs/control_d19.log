@@ -1,0 +1,49 @@
+239226 rank-4 shapes indexed
+Leech#0: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#1: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#2: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#4: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#5: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#6: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#9: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#10: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#11: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#12: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#14: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#15: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#17: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#19: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#20: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#23: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#26: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#31: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#33: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#36: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#38: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#40: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#43: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#44: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#45: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#46: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#47: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#50: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#51: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#52: norm 8, tensor rank 3, tr(conj W X) = 4.0000
+Leech#54: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#56: norm 8, tensor rank 4, tr(conj W X) = 4.0000
+   (b) X in the production list: True
+   (c) embedding found: True
+Leech#57: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#60: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#61: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#62: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#63: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#65: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#66: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#67: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#68: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#70: norm 8, tensor rank 2, tr(conj W X) = 4.0000
+Leech#71: norm 8, tensor rank 4, tr(conj W X) = 4.0000
+   (b) X in the production list: True
+   (c) embedding found: True
+CONTROL PASSED

@@ -97,8 +97,10 @@ def short_vectors(G, B):
     """numpy int array (n x count), one representative of each +-pair, norm <= B."""
     import numpy as np
     M = pari.qfminim(G, B, None, 2)[2]
-    txt = str(pari.mattranspose(M)).replace("[", "").replace("]", "").replace(";", ",")
-    return np.array(txt.split(","), dtype=np.int64).reshape(len(M), len(G)).T
+    if len(M) == 0:
+        return np.zeros((len(G), 0), dtype=np.int64)
+    import re
+    return np.array(re.findall(r"-?\d+", str(pari.mattranspose(M))), dtype=np.int64).reshape(len(M), len(G)).T
 
 def pair_types(G, J, K, V, W=None, chunk=400, sample=None, seed=0):
     """Hermitian inner products h(x,y) = u + v*eta for x in V (optionally a random

@@ -122,20 +122,77 @@ Follow-up on the 13 (d = 19):
   50 sublattices `A₂ ⊗ P` (dimension 48) for sections A₂ spanned by vectors of
   norm ≤ 8: smallest norm found is **10**, attained on the four sections of
   determinant 4. BKZ up to block 70 on the full lattice also returns 10.
-- Not tested: tensors of rank 3 and 4, and rank-2 tensors on larger sections.
-  So for these 10 the minimum is **at most 10** (attained) and **no vector of
-  norm < 10 has been found**; whether it is 8 or 10 is open.
+- The ten have the same Hermitian automorphism group order, **|Aut_{O_K}(P)| = 4368 =
+  2·|SL₂(13)|** (PARI `qfauto` with the forms G and G(2J−1)), the order of
+  Coulangeon–Nebe's P₃ (Aut SL₂(13).2), the structure that gives P48n over ℚ(√−11).
+  They are very probably one lattice. #0 (killed) has |Aut| = 52.
 
-Reading: almost all candidates contain a vector of norm ≤ 8 that LLL finds
-immediately (as in Γ72, where the bad Leech structures contain a copy of the
-brick). The 10 remaining ones are **undecided**: see §5 step 1.
+#### 4.1.1 Exact decision procedure (running for #81)
+
+For z ∈ A ⊗ P of rank r there is a primitive rank-r section A_r of A with
+z = Σ bᵢ ⊗ xᵢ, (bᵢ) a basis of A_r, and h(z,z) = tr(W_r · X̄), where W_r = Gram(A_r)
+and X = Gram(x₁,…,x_r) (positive definite, entries in 𝔇⁻¹, integer diagonal ≥ 2,
+no vector of norm 1 in (O_K^r, X)).
+- r = 1: h ≥ 3·2 = 6 > 4. Excluded.
+- r ≥ 2: Coulangeon's Prop. 3.2 plus Hermite bounds for d_r(P) (Z-sections of
+  Leech have minimum 4; γ₄ = √2, γ₆ = (64/3)^{1/6}) give det A₂ ≤ 9.50 and
+  det A₃ ≤ 14.18. Enumerated completely: **19** classes of rank-2 sections
+  (via a minimal vector w₁ and a second vector bounded with the covering radius
+  1.316 of O_K) and **240** classes of rank-3 sections (w^⊥ for h(w,w) ≤ 14).
+- For W = W_r, `etype/certify.py: enumerate_X` lists every X with tr(W X̄) ≤ 4
+  (Fincke–Pohst in the Cholesky coordinates of W⁻¹; finite and exact).
+  Result: 23 (r = 2), 88 (r = 3), 239 337 (r = 4) shapes.
+- Necessary filter: the Hermitian products between minimal vectors of
+  (O_K^r, X) must occur between minimal vectors of P. The complete table
+  for P (all 196 560² pairs) has 67 values; the filter removes 94 182 shapes.
+- O_K-isometry classes (`qfisom` on the pair (G, G(2J−1))): **7926** (2 / 15 / 7909).
+- For each class: exhaustive search for an O_K-linear isometric embedding into P.
+  The frame is chosen from minimal vectors so that the prescribed products are
+  rare in P; the first frame vector runs over the **45 orbits of Aut(P)** on the
+  minimal vectors; the final map is checked to be integral.
+
+**z of norm ≤ 8 exists ⟺ some class embeds.** All classes embed nowhere ⟹ min(A ⊗ P) = 10,
+i.e. an extremal even unimodular lattice of rank 96. Classes whose minimal
+vectors do not span are reported separately and need norm-6 frame vectors.
+
+Control (`scripts/control_rank48.py`, Coulangeon–Nebe Prop. 4.1): for P ⊗ T over
+ℚ(√−11) the same pipeline enumerates exactly the three shapes T, L_K, L̄_K, finds an
+embedding for structures with min 4, and finds none for the SL₂(13).2 structure
+(P48n). **Passed** for the negative case (P48n: no shape embeds). Positive case on d = 19
+itself (`scripts/control_d19.py`, production brick and shapes): for killed candidates
+whose BKZ norm-8 vector has tensor rank 4, the vector's X occurs *exactly* in the
+production list and the search finds its embedding (**passed**, Leech #56, #71).
+Also checked numerically: h(z,z) = tr(W̄·X) with the conjugation used in the code
+(an earlier version of the d = 19 control failed only because it used a rank-2 vector).
+
+**Result: DECIDED, minimum 8.** The embedding search found 14 shape classes (all rank 4)
+that embed into P. Each gives an explicit z ∈ A ⊗ P (`scripts/verify_kill.py`):
+integral coordinates in the lattice basis, norm **exactly 8** in the 96-dimensional
+Gram matrix (three verified and stored in `results/decide_d19_81/kill_vectors.pkl`).
+The other nine undecided structures (#30, 82, 109, 149, 160, 259, 260, 364, 366) are
+O_K-isometric to #81 (`qfisom`), so they give the same lattice.
+
+**Conclusion: every A ⊗ Leech candidate over ℚ(√−19), ℚ(√−20), ℚ(√−23), ℚ(√−24)
+has minimum ≤ 8.** None is extremal. Lessons:
+- BKZ up to block 70 did not find these norm-8 vectors; the exact shape+embedding
+  method did. For every future candidate, the exact method is the gate.
+- The method is general: it decides min(A ⊗_{O_K} P) for any brick A of small rank
+  and any P with a large automorphism group, at a cost of hours.
 
 ### 4.2 Bricks
 
-Rank-4 Hermitian unimodular lattices over ℤ[(1+√−11)/2]: 5 classes seen, none
-with hmin 3 — so `A ⊗ Leech` over ℚ(√−11), the natural continuation of C–N §4,
-is impossible. (Completeness of the 5 classes is not yet certified by a mass
-formula.)
+Cross-check with Schiemann (J. Symb. Comp. 26 (1998), Table 1: class numbers and
+largest Hermitian minima of unimodular genera):
+- ℚ(√−11), rank 4: 6 classes, max minimum 2 → `A ⊗ Leech` over ℚ(√−11) needs
+  hmin 3 and is **impossible** (now certified, not just "not seen").
+- ℚ(√−19), rank 4: 12 classes, max minimum 3. Walks found 9 invariant classes,
+  two with hmin 3 ((6,20), (6,24)).
+- ℚ(√−23), rank 4: 126 classes, max 4 — our (8,66) brick is one of the maximal ones.
+- **New bricks not yet used:** the *even* genera over ℚ(√−5) (d = 20, rank 4:
+  13 classes, max minimum 4) and ℚ(√−6) (d = 24: 9 classes, max 4), and rank 5/6
+  over d = 35, 39, 40, 56 with minima 5–6 (relevant for rank 96 via rank-48
+  structures, or rank 84/120 constructions). Our walks start from O_K^m and so
+  never reach the even genera.
 
 ### 4.3 p = 17 route for (ℓ = 5, rank 64)
 
@@ -147,7 +204,7 @@ construction is the only way in; the pipeline applies unchanged (5 = c·c̄ in
 
 ## 5. Plan
 
-**Step 1 — decide the undecided rank-96 candidates.** (Highest value; days.)
+**Step 1 — decide the undecided rank-96 candidates.** **Done** (§4.1.1): minimum 8.
 Stored in `results/SURVIVOR_rank96_d19_*.json` (regenerate with
 `scripts/rank96_tensor.py 5 1`). In order of cost:
 1. Identify the isometry classes among the 10, then extend `rank2_kill` /
@@ -162,7 +219,15 @@ Stored in `results/SURVIVOR_rank96_d19_*.json` (regenerate with
 Expectation, stated plainly: an extremal rank-96 lattice would be a major
 result, and the prior is strongly that these candidates have minimum 8.
 
-**Step 2 — widen the rank-96 tensor family.** (Cheap; hours each.)
+**Step 2 — widen the rank-96 tensor family.** (Now the main line; hours each.)
+- Bricks of Hermitian minimum 4 from Schiemann's *even* genera (ℚ(√−5), ℚ(√−6), rank 4)
+  and from ℚ(√−23) / ℚ(√−31) (rank 4, min 4): split vectors of norm 16, so only the
+  non-split ones matter. Generate them by neighbour walks from an even start lattice.
+- Leech structures with a large Hermitian automorphism group: by Nebe (JNT 161, 2016,
+  Thm 3.8), an extremal 96-dimensional lattice with an automorphism of prime order
+  p > 7 has p ∈ {13, 17} acting fixed-point-freely, or types 11−(8,16)−8 / 13−(7,12)−7.
+  Structures with SL₂(13)-type symmetry (as here) or order-17 symmetry are the natural
+  ones; the dead candidate had exactly the order-13 symmetry.
 - More fields: `scripts/rank96_tensor.py N t` for d = 31, 35, 39, 40, 43, 47.
 - More Leech structures: m with φ(m) = 12 covers only structures with a cyclic
   symmetry; add neighbour walks in the rank-12 Hermitian genus.
@@ -224,7 +289,13 @@ This track is independent of the constructions and not started in code.
 | `scripts/validate.py` | validation harness (run first) |
 | `scripts/brick_survey.py` | Hermitian minima of small unimodular genera |
 | `scripts/rank96_tensor.py` | the rank-96 `A ⊗ Leech` search for one field |
-| `scripts/attack.py`, `scripts/rank2_test.py`, `scripts/section_test.py` | stronger kill tests on the d = 19 candidates |
+| `scripts/attack.py`, `scripts/rank2_test.py`, `scripts/section_test.py` | heuristic kill tests (superseded by the exact method) |
+| `etype/certify.py` | exact enumeration of Gram shapes X with tr(W̄X) ≤ T |
+| `etype/represent.py` | Hermitian automorphisms/isometries (qfauto/qfisom), exhaustive embedding search |
+| `scripts/shapes.py`, `scripts/decide.py` | exact decision of min(A ⊗ P) ≤ 8: sections → shapes → classes → embeddings |
+| `scripts/verify_kill.py` | turns an embedding into an explicit short vector and checks its norm exactly |
+| `scripts/control_rank48.py`, `scripts/control_d19.py` | negative / positive controls of the exact method |
+| `scripts/leech_types.py`, `scripts/leech_with_zeta.py` | inner-product table of minimal vectors; ζ_m-action of ideal-lattice structures |
 | `scripts/mass_p17.py` | mass estimate for the p = 17 genus |
 | `results/`, `logs/` | outputs of the runs reported in §4 |
 | `archive/` | the uploaded brief and files, unchanged |
