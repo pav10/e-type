@@ -1,0 +1,5 @@
+d = 24, rank 4: 9 starting lattices (['even', 'odd'])
+classes found: {'odd': 28, 'even': 16}   (9s)
+  even  Hermitian min 4  kissing 70 : 2 class(es)
+  even  Hermitian min 4  kissing 72 : 2 class(es)
+  odd  Hermitian min 3  kissing 16 : 3 class(es)

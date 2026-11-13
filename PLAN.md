@@ -138,7 +138,7 @@ no vector of norm 1 in (O_K^r, X)).
   Leech have minimum 4; γ₄ = √2, γ₆ = (64/3)^{1/6}) give det A₂ ≤ 9.50 and
   det A₃ ≤ 14.18. Enumerated completely: **19** classes of rank-2 sections
   (via a minimal vector w₁ and a second vector bounded with the covering radius
-  1.316 of O_K) and **240** classes of rank-3 sections (w^⊥ for h(w,w) ≤ 14).
+  1.316 of O_K) and **233** classes of rank-3 sections (w^⊥ for h(w,w) ≤ 14).
 - For W = W_r, `etype/certify.py: enumerate_X` lists every X with tr(W X̄) ≤ 4
   (Fincke–Pohst in the Cholesky coordinates of W⁻¹; finite and exact).
   Result: 23 (r = 2), 88 (r = 3), 239 337 (r = 4) shapes.
@@ -179,22 +179,26 @@ has minimum ≤ 8.** None is extremal. Lessons:
 - The method is general: it decides min(A ⊗_{O_K} P) for any brick A of small rank
   and any P with a large automorphism group, at a cost of hours.
 
-### 4.2 Bricks
+### 4.2 Bricks (rank 4, Hermitian unimodular) — complete genera, checked against Schiemann
 
-Cross-check with Schiemann (J. Symb. Comp. 26 (1998), Table 1: class numbers and
-largest Hermitian minima of unimodular genera):
-- ℚ(√−11), rank 4: 6 classes, max minimum 2 → `A ⊗ Leech` over ℚ(√−11) needs
-  hmin 3 and is **impossible** (now certified, not just "not seen").
-- ℚ(√−19), rank 4: 12 classes, max minimum 3. Walks found 9 invariant classes,
-  two with hmin 3 ((6,20), (6,24)).
-- ℚ(√−23), rank 4: 126 classes, max 4 — our (8,66) brick is one of the maximal ones.
-- **New bricks not yet used:** the *even* genera over ℚ(√−5) (d = 20, rank 4:
-  13 classes, max minimum 4) and ℚ(√−6) (d = 24: 9 classes, max 4), and rank 5/6
-  over d = 35, 39, 40, 56 with minima 5–6 (relevant for rank 96 via rank-48
-  structures, or rank 84/120 constructions). Our walks start from O_K^m and so
-  never reach the even genera.
+`scripts/bricks.py` walks from O_K⁴ *and* from rank-4 ideal lattices over ℚ(ζ_k)·K
+(these reach the even genera), with classes up to O_K-isometry (`qfisom`). Class numbers
+agree exactly with Schiemann, J. Symb. Comp. 26 (1998), Tables 1–2:
 
-### 4.3 p = 17 route for (ℓ = 5, rank 64)
+| K | genus | classes found | Schiemann | best Hermitian min (classes) |
+|---|---|---|---|---|
+| ℚ(√−5), d = 20 | odd / even | 18 / 13 | 18 / 13 | 3 / **4** (3 classes, kissing 120) |
+| ℚ(√−6), d = 24 | odd / even | 28 / 16 | 28 / 9 + 7 (two spaces) | 3 / **4** (4 classes) |
+| ℚ(√−31) | I | 216 | 216 | 4 (3 classes) |
+| ℚ(√−43) | I | 69 | 69 | **5** (1 class) |
+| ℚ(√−67) | I | 301 | 301 | **6** (2 classes); 5 (30 classes) |
+| ℚ(√−11) | I | — | 6 | 2 → `A ⊗ Leech` over ℚ(√−11) impossible |
+
+### 4.3 Rank 96 with the new bricks (BKZ-50 pre-filter, then exact test)
+
+RESULTS_NEW_BRICKS
+
+### 4.4 p = 17 route for (ℓ = 5, rank 64)
 
 Mass ≈ 10⁴⁰: genus enumeration is out. A prescribed *group* or a tensor/ideal
 construction is the only way in; the pipeline applies unchanged (5 = c·c̄ in

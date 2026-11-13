@@ -1,0 +1,18 @@
+candidate: brick #3 (8, 120, 'even') (x) Leech#275, rank 96, det 1
+K = Q(sqrt(-20)), h_K = 2, hmin(A) = 4; bounds det A_2 <= 10.00, det A_3 <= 15.30
+  ***   Warning: increasing stack size to 2000003072.
+Traceback (most recent call last):
+  File "/home/user/e-type/scripts/exact96.py", line 23, in <module>
+    res = decide(K, A, JA, P, JP, out, nproc=nproc, log=lambda s: print(s, flush=True))
+  File "/home/user/e-type/scripts/../etype/exact.py", line 156, in decide
+    secs = sections(A, JA, K, C, hminA)
+  File "/home/user/e-type/scripts/../etype/exact.py", line 63, in sections
+    W1 = short_vectors(A, int(2 * h1) + 1); W2 = short_vectors(A, int(2 * h2) + 1)
+                                                 ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/e-type/scripts/../etype/search.py", line 99, in short_vectors
+    M = pari.qfminim(G, B, None, 2)[2]
+        ~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "cypari2/auto_instance.pxi", line 33935, in cypari2.pari_instance.Pari_auto.qfminim
+  File "cypari2/handle_error.pyx", line 211, in cypari2.handle_error._pari_err_handle
+cypari2.handle_error.PariError: the PARI stack overflows (current size: 2000003072; maximum size: 2000003072)
+You can use pari.allocatemem() to change the stack size and try again
