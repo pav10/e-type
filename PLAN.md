@@ -196,7 +196,29 @@ agree exactly with Schiemann, J. Symb. Comp. 26 (1998), Tables 1–2:
 
 ### 4.3 Rank 96 with the new bricks (BKZ-50 pre-filter, then exact test)
 
-RESULTS_NEW_BRICKS
+BKZ-50 kills (rigorous: explicit vectors) and survivors, `A ⊗ Leech`:
+
+| K | bricks used (hmin) | Leech structures | candidates | killed by BKZ | BKZ survivors |
+|---|---|---|---|---|---|
+| ℚ(√−5) | 3 even bricks (4) | 359 | 1077 | 1035 | 42 (brick #3: 2, #4: 24, #5: 16) |
+| ℚ(√−6) | 4 even bricks (4) | 348 | 1392 | 1378 | 14 (all brick #6, not free) |
+| ℚ(√−43) | 1 brick (5) | 357 (m = 28, 21) | 357 | 357 (mostly norm 6) | 0 |
+| ℚ(√−43) | 12 bricks (4) | 357 | 4284 | running | 424 of the first 3132 |
+| ℚ(√−67) | 2 bricks (6) | — | — | Leech structures not yet computed (PARI stack) | — |
+
+A larger brick minimum does **not** help: the hmin-5 brick over ℚ(√−43) gives
+vectors of norm 6, shorter than the hmin-3/4 bricks.
+
+Exact follow-up (BKZ survivors are not evidence; §4.1.1):
+- ℚ(√−5), brick #4 ⊗ Leech #111 (|Aut_h(P)| = 84): **killed**, explicit vector of
+  norm 8 (`scripts/kill_stream.py`, 3397 shape classes searched).
+- The killing shape transferred: Leech #145 **killed** (explicit norm-8 vector);
+  for the other brick-4 survivors tested so far the shape does not occur — those
+  stay undecided until their own kill test or full decision.
+- Brick #3 survivors (|Aut_h(P)| = 2184 = |SL₂(13)|, the same symmetry as the dead
+  d = 19 lattice): kill test running.
+- BKZ with rerandomised bases is *weaker* than plain BKZ here (d = 19 control:
+  best 12 over 12 tries vs. 10), so no cheap heuristic screen is available.
 
 ### 4.4 p = 17 route for (ℓ = 5, rank 64)
 
