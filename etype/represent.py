@@ -173,6 +173,7 @@ class MinHost:
     and Hermitian products coded as integers  code = du * 4096 + dv."""
     def __init__(self, G, J, K, hnorm=2, gens=None):
         self.K = _K(K); self.G = _np(G); self.J = _np(J)
+        self.hnorm = hnorm
         V = short_vectors(G, 2 * hnorm)
         nr = np.einsum("ik,ij,jk->k", V, self.G, V)
         V = V[:, nr == 2 * hnorm]
@@ -286,12 +287,13 @@ def embeds_fast(host, GM, JM, K, freq, prepare_only=False):
     N, t = _K(K)
     G, J = _np(GM), _np(JM)
     r = len(G) // 2
-    V = short_vectors(GM, 4)
+    hn = 2 * getattr(host, "hnorm", 2)                    # Z-norm of the host's minimal vectors
+    V = short_vectors(GM, hn)
     if V.shape[1] == 0:
         return None, "no minimal vectors"
     V = np.concatenate([V, -V], axis=1)
     nr = np.einsum("ik,ij,jk->k", V, G, V)
-    V = V[:, nr == 4]
+    V = V[:, nr == hn]
     a = V.T @ G @ V; c = V.T @ G @ (J @ V)
     C = (2 * N * a - t * c) * 4096 + (2 * c - t * a)
     F = np.vectorize(lambda x: freq.get(int(x), 0.0))(C)

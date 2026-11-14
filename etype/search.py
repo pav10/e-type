@@ -30,7 +30,8 @@ def ideal_family(K, m, c="1", reduce_pol=True, maxsol=4):
     Returns [(G, J)] LLL-reduced, J = multiplication by eta."""
     N, t = _K(K)
     pari("P = polcompositum(polcyclo(%d), x^2 - %d*x + %d)[1]" % (m, t, N))
-    if int(pari("poldegree(P)")) != 2 * int(pari("eulerphi(%d)" % m)):
+    deg = int(pari("poldegree(P)")); ph = int(pari("eulerphi(%d)" % m))
+    if deg not in (ph, 2 * ph):                           # deg = phi(m): K inside Q(zeta_m)
         return []
     if reduce_pol:
         pari("P = polredbest(P)")

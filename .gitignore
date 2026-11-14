@@ -16,3 +16,6 @@ logs/transfer_d20_b4.log
 logs/kill_d20_3_275.log
 results/SURVIVOR_rank96_d43_*
 # (d=43 run still writing survivors; added with git add -f when it finishes)
+logs/srfp_bkz_srfp_G96.log
+logs/srfp_bkz_srfp_G96_seed142_uploaded.log
+logs/srfp_kill_det.log

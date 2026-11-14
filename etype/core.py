@@ -125,7 +125,7 @@ def tensor_OK(G1, J1, G2, J2, K):
 # ----------------------------------------------------------------------------
 # short-vector search ("kill test")
 # ----------------------------------------------------------------------------
-def bkz_shortest(G, block=40, loops=8, target=None, verbose=False, seed=0):
+def bkz_shortest(G, block=40, loops=8, target=None, verbose=False, seed=0, input_coords=False):
     """Heuristic search for short vectors of the lattice with Gram G.
 
     Returns (norm, coefficient vector) of the shortest vector found; the norm is
@@ -135,7 +135,8 @@ def bkz_shortest(G, block=40, loops=8, target=None, verbose=False, seed=0):
     import numpy as np
     from fpylll import IntegerMatrix, GSO, LLL, BKZ
     from fpylll.algorithms.bkz2 import BKZReduction
-    G = lll(G)
+    U0 = pari.qflllgram(G, 1)
+    G = pari.mattranspose(U0) * G * U0
     n = len(G)
     Gf = np.array([[float(G[i, j]) for j in range(n)] for i in range(n)])
     R = np.linalg.cholesky(Gf).T                         # G = R^T R, columns = basis
@@ -171,6 +172,9 @@ def bkz_shortest(G, block=40, loops=8, target=None, verbose=False, seed=0):
             print("   BKZ-%d: shortest found %d" % (b, best[0]), flush=True)
         if target is not None and best[0] <= target:
             break
+    if input_coords and best[1] is not None:
+        xin = U0 * pari.matrix(n, 1, best[1])
+        return best[0], [int(xin[i, 0]) for i in range(n)]
     return best
 
 

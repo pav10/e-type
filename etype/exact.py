@@ -56,7 +56,7 @@ def _np(M):
     return np.array([[int(M[i, j]) for j in range(len(M))] for i in range(len(M))], dtype=np.int64)
 
 
-def sections(A, JA, K, C, hminA):
+def sections(A, JA, K, C, hminA, zunimod=False):
     """Isometry classes of primitive rank-2, rank-3 sections of the rank-4 brick A with
     Hermitian determinant below the bounds C['B']."""
     D = C["D"]; An, JAn = _np(A), _np(JA)
@@ -77,7 +77,9 @@ def sections(A, JA, K, C, hminA):
         Gs, Js = lll(pari.mattranspose(S) * A * S, pari.matinverseimage(S, JA * S))
         if float(pari.matdet(Gs)) <= D ** 3 * C["B"][3] ** 2 + 1e-6:
             add(out[3], Gs, Js)
-    W = short_vectors(A, int(2 * C["B"][3] * C["cK"]) + 1)
+    # S = w^perp.  Hermitian unimodular A: d_S = d(O_K w sat.);  Z-unimodular A (e.g. E8): d_S = d(.)/D.
+    wmax = C["B"][3] * C["cK"] * (D if zunimod else 1)
+    W = short_vectors(A, int(2 * wmax) + 1)
     for c in W.T:
         perp(c)
     # rank 2: S saturated; w1 minimal in S, w2 = first vector of S outside K w1.
@@ -111,25 +113,26 @@ def sections(A, JA, K, C, hminA):
     return out
 
 
-def _admissible(K):
+def _admissible(K, hP=2):
     def keep(Tv, dg, off):
         G, J = X_lattice(dg, off, K)
-        return count_short(G, 2) == 0                  # no vector of Hermitian norm 1
+        return count_short(G, 2 * hP - 2) == 0         # no vector of Hermitian norm < hmin(P)
     return keep
 
 
 def _shape_worker(args):
     W, K, T, part, nparts = args[:5]
     out = args[5] if len(args) > 5 else None
+    hP = args[6] if len(args) > 6 else 2
     if out and os.path.exists(out):
         return pickle.load(open(out, "rb"))
-    good = enumerate_X(W, K, T, part=(part, nparts), keep=_admissible(K))
+    good = enumerate_X(W, K, T, hmin=hP, part=(part, nparts), keep=_admissible(K, hP))
     if out:
         pickle.dump(good, open(out + ".tmp", "wb")); os.replace(out + ".tmp", out)
     return good
 
 
-def all_shapes(A, JA, K, secs, nproc=3, T=4.0, log=print, partdir=None):
+def all_shapes(A, JA, K, secs, nproc=3, T=4.0, log=print, partdir=None, hP=2):
     """[(r, Tv, diag, off)] for the rank-2/3 sections and the full brick; non-free sections
     are returned separately."""
     import multiprocessing as mp
@@ -141,7 +144,7 @@ def all_shapes(A, JA, K, secs, nproc=3, T=4.0, log=print, partdir=None):
             except RuntimeError:
                 cx, ideals = steinitz_gram(Gs, Js, K)                # non-free: Steinitz pseudo-basis
                 nonfree.append((r, str(Gs), str(Js), ideals))
-            shapes += [(r,) + s for s in _shape_worker((cx, K, T, 0, 1))]
+            shapes += [(r,) + s for s in _shape_worker((cx, K, T, 0, 1, None, hP))]
     log("rank-2/3 sections: %d shapes, %d non-free sections" % (len(shapes), len(nonfree)))
     try:
         v, ex, W = ok_basis(A, JA, K)
@@ -152,14 +155,14 @@ def all_shapes(A, JA, K, secs, nproc=3, T=4.0, log=print, partdir=None):
     NP = 48
     pdir = (partdir or "/tmp") ; os.makedirs(pdir, exist_ok=True)
     with mp.get_context("fork").Pool(nproc, maxtasksperchild=1) as pool:
-        parts = pool.map(_shape_worker, [(W, K, T, p, NP, os.path.join(pdir, "part_%02d.pkl" % p)) for p in range(NP)], chunksize=1)
+        parts = pool.map(_shape_worker, [(W, K, T, p, NP, os.path.join(pdir, "part_%02d.pkl" % p), hP) for p in range(NP)], chunksize=1)
     s4 = [s for p in parts for s in p]
     log("rank-4: %d shapes (%.0fs)" % (len(s4), time.time() - t0))
     shapes += [(4,) + s for s in s4]
     return shapes, nonfree, v
 
 
-def classes(shapes, K, allowed, log=print):
+def classes(shapes, K, allowed, log=print, hP=2):
     """pair-type filter against P, then O_K-isometry classes.  Memory-light: shapes stay plain
     Python data; PARI objects live only inside the scoped helpers; representatives are kept
     as strings.  Returns [(r, G, J)] with PARI G, J for the representatives."""
@@ -167,7 +170,7 @@ def classes(shapes, K, allowed, log=print):
     groups = collections.defaultdict(list); nf = [0]
     def key_of(s):
         G, J = X_lattice(s[2], s[3], K)
-        V = short_vectors(G, 4)
+        V = short_vectors(G, 2 * hP)
         if V.shape[1]:
             V = np.concatenate([V, -V], axis=1)
             Gn, Jn = _np(G), _np(J)
@@ -204,42 +207,43 @@ def _embed_worker(ci):
     return ci, ok
 
 
-def brick_shapes(K, A, JA, cache, nproc=3, log=print):
+def brick_shapes(K, A, JA, cache, nproc=3, log=print, hminP=2, T=4.0):
     """Sections and Gram shapes of a brick (independent of P), cached on disk."""
     if os.path.exists(cache):
         return pickle.load(open(cache, "rb"))
     hminA = minimum_exact(A) // 2
-    C = constants(K, hminA)
-    log("K = Q(sqrt(-%d)), h_K = %d, hmin(A) = %d; bounds det A_2 <= %.2f, det A_3 <= %.2f"
-        % (C["D"], C["hK"], hminA, C["B"][2], C["B"][3]))
+    C = constants(K, hminA, hminP, T)
+    zunimod = pari.matdet(A) == 1
+    log("K = Q(sqrt(-%d)), h_K = %d, hmin(A) = %d (%s), hmin(P) = %d, T = %g; bounds det A_2 <= %.3f, det A_3 <= %.3f"
+        % (C["D"], C["hK"], hminA, "Z-unimodular" if zunimod else "Hermitian unimodular", hminP, T, C["B"][2], C["B"][3]))
     t0 = time.time()
     sfile = cache + ".sections"
     if os.path.exists(sfile):
         secs = {r: [(pari(G), pari(J)) for G, J in v] for r, v in pickle.load(open(sfile, "rb")).items()}
     else:
-        secs = sections(A, JA, K, C, hminA)
+        secs = sections(A, JA, K, C, hminA, zunimod=zunimod)
         pickle.dump({r: [(str(G), str(J)) for G, J in v] for r, v in secs.items()}, open(sfile, "wb"))
     log("sections: %d of rank 2, %d of rank 3 (%.0fs)" % (len(secs[2]), len(secs[3]), time.time() - t0))
-    shapes, nonfree, vecsA = all_shapes(A, JA, K, secs, nproc=nproc, log=log, partdir=cache + ".parts")
+    shapes, nonfree, vecsA = all_shapes(A, JA, K, secs, nproc=nproc, log=log, partdir=cache + ".parts", T=T, hP=hminP)
     res = (shapes, nonfree, vecsA)
     pickle.dump(res, open(cache, "wb"))
     return res
 
 
-def decide(K, A, JA, P, JP, outdir, nproc=3, maxcost=1e6, log=print, cache=None):
+def decide(K, A, JA, P, JP, outdir, nproc=3, maxcost=1e6, log=print, cache=None, hminP=2, T=4.0):
     """Returns ('KILLED', norm, z) / ('NO EMBEDDING', report) / ('INCOMPLETE', report)."""
     import multiprocessing as mp
     os.makedirs(outdir, exist_ok=True)
     N, t = _K(K)
-    shapes, nonfree, vecsA = brick_shapes(K, A, JA, cache or os.path.join(outdir, "brick_shapes.pkl"), nproc=nproc, log=log)
+    shapes, nonfree, vecsA = brick_shapes(K, A, JA, cache or os.path.join(outdir, "brick_shapes.pkl"), nproc=nproc, log=log, hminP=hminP, T=T)
     log("%d shapes, %d non-free sections" % (len(shapes), len(nonfree)))
     o, gens = herm_aut(P, JP, K)
-    host = MinHost(P, JP, K, gens=gens); fq = code_freq(host)
+    host = MinHost(P, JP, K, hnorm=hminP, gens=gens); fq = code_freq(host)
     allowed = set()
     for i in host.reps:
         allowed |= set(np.unique(host.code(np.array([i]), np.arange(host.V.shape[1]))[0]).tolist())
     log("|Aut(P)| = %d, %d orbits on minimal vectors, %d product types" % (o, len(host.reps), len(allowed)))
-    cl = classes(shapes, K, allowed, log=log)
+    cl = classes(shapes, K, allowed, log=log, hP=hminP)
     costs = []
     for r, G, J in cl:
         res = embeds_fast(host, G, J, K, fq, prepare_only="cost")
