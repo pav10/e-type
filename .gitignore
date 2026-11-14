@@ -1,2 +1,7 @@
 data/
 __pycache__/
+results/*.pkl
+results/*.pkl.parts/
+results/*.pkl.sections
+results/decide_*/
+results/exact_*/
