@@ -1,0 +1,3 @@
+K = Q(sqrt(-20)), h_K = 2, hmin(A) = 4; bounds det A_2 <= 10.00, det A_3 <= 15.30
+sections: 13 of rank 2, 38 of rank 3 (338s)
+rank-2/3 sections: 333 shapes, 27 non-free sections
