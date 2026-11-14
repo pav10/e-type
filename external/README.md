@@ -17,7 +17,8 @@ Findings
 1. Both matrices: even, unimodular, rank 96, positive definite (checked).
 2. Both contain vectors of norm 10 (BKZ-50), so min ≤ 10 (their own bound: ≤ 16).
 3. Seed-free version: **minimum 8** (explicit vector) — not extremal.
-4. Seed-142 version: BKZ up to 60 finds 10; undecided (min 8 or 10).
+4. Seed-142 version (the user's `G96_reduced.txt`): BKZ-70 finds a vector of norm **8** (norm computed
+   exactly in that Gram matrix) — **also not extremal**. Vector being re-extracted to `srfp_G96_seed142_norm8_vector.txt`.
 5. Their own audit prints "Extremal Min 10 Established: NO"; the page's theorem is conditional.
 6. Their "min(Λ₈₈) ≥ 12" step is not a proof: the Schur-complement search keeps only ONE
    candidate tail vector (`qfminim(..., 1, 2)`) and lifts only that direction.
