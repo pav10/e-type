@@ -92,7 +92,7 @@ ideal_lattices(bnf, c, ops = [], maxsol = 8, verbose = 0) =
     for (i = 1, #cyc, if (e[i], Id = idealmul(nf, Id, idealpow(nf, gen[i], e[i]))));
     Id = idealred(nf, Id);
     A = idealdiv(nf, cid, idealmul(nf, idealmul(nf, Id, nfgaloisapply(nf, lift(s), Id)), D));
-    t = bnfisprincipal(bnf, A);
+    t = bnfisprincipal(bnf, A, 3);
     if (t[1] != 0, next);
     al = totpos_gens(bnf, s, nfbasistoalg(nf, t[2]), RU, maxsol);
     for (k = 1, #al,

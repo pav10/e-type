@@ -25,6 +25,7 @@ for b, ls in surv.items():
     for l in ls:
         P, JP = leech[l]["G"], leech[l]["J"]
         o = herm_aut(P, JP, K)[0]
+        print("  brick #%d Leech#%d |Aut_h| = %d" % (b, l, o), flush=True)
         for g in reps:
             if g["aut"] == o and herm_isom(P, JP, leech[g["rep"]]["G"], leech[g["rep"]]["J"], K):
                 g["members"].append(l); break

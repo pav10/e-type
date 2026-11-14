@@ -47,7 +47,7 @@ def _fp(G, m0, R, out, limit=10**7):
     rec(n - 1, R + 1e-9)
 
 
-def enumerate_X(W, K, T, hmin=2, part=(0, 1), verbose=False):
+def enumerate_X(W, K, T, hmin=2, part=(0, 1), verbose=False, keep=None):
     """All positive definite X (r x r) with entries (a + b*eta)/sqrt(-d), integer
     diagonal >= hmin, value >= hmin on a set of small test vectors, and
     tr(W conj X) <= T.   W: complex Hermitian r x r (Gram of the basis of A').
@@ -84,7 +84,8 @@ def enumerate_X(W, K, T, hmin=2, part=(0, 1), verbose=False):
             if vals.min() < hmin - 1e-6:
                 return
             Tv = float(np.trace(Winv_c @ X).real)
-            res.append((Tv, tuple(diag), dict(off)))
+            if keep is None or keep(Tv, tuple(diag), off):
+                res.append((Tv, tuple(diag), dict(off)))
             return
         if k == 2:                                   # split the search for parallel runs
             counter[0] += 1

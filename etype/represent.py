@@ -194,10 +194,24 @@ def _code(du, dv):
     return du * 4096 + dv
 
 
+def _types(host):
+    """code -> small integer id for every product value occurring between minimal vectors."""
+    if not hasattr(host, "code2id"):
+        allc = set()
+        for i in host.reps:
+            allc |= set(np.unique(host.code(np.array([i]), np.arange(host.V.shape[1]))[0]).tolist())
+        host.code2id = {c: k for k, c in enumerate(sorted(allc))}
+        assert len(host.code2id) < 255
+    return host.code2id
+
+
 def _row(host, i1):
+    """type ids (uint8) of h(v_i1, .) against all minimal vectors, cached: ~0.2 MB per rep."""
     cache = host.__dict__.setdefault("_rows", {})
     if i1 not in cache:
-        cache[i1] = host.code(np.array([i1]), np.arange(host.V.shape[1]))[0]
+        c2i = _types(host)
+        codes = host.code(np.array([i1]), np.arange(host.V.shape[1]))[0]
+        cache[i1] = np.array([c2i[c] for c in codes.tolist()], dtype=np.uint8) if len(c2i) else None
     return cache[i1]
 
 
@@ -206,9 +220,13 @@ def embed_frame(host, tg, r, check=None, reps=None):
     (i < j), y_1 running over orbit representatives (or the subset `reps`).
     check(ys) -> bool is the final integrality test.  Returns ys or None (exhaustive)."""
     allidx = np.arange(host.V.shape[1])
+    c2i = _types(host)
+    for k in range(1, r):
+        if tg[(0, k)] not in c2i:
+            return None                                   # this product never occurs: no embedding
     for i1 in (host.reps if reps is None else reps):
         row = _row(host, i1)
-        C = [None] + [allidx[row == tg[(0, k)]] for k in range(1, r)]
+        C = [None] + [allidx[row == c2i[tg[(0, k)]]] for k in range(1, r)]
         if any(len(c) == 0 for c in C[1:]):
             continue
         sol = _ext(host, [i1], C, tg, 1, r, check)

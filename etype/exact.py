@@ -111,18 +111,25 @@ def sections(A, JA, K, C, hminA):
     return out
 
 
-def _shape_worker(args):
-    W, K, T, part, nparts = args
-    R = enumerate_X(W, K, T, part=(part, nparts))
-    good = []
-    for Tv, dg, off in R:
+def _admissible(K):
+    def keep(Tv, dg, off):
         G, J = X_lattice(dg, off, K)
-        if count_short(G, 2) == 0:
-            good.append((Tv, dg, off))
+        return count_short(G, 2) == 0                  # no vector of Hermitian norm 1
+    return keep
+
+
+def _shape_worker(args):
+    W, K, T, part, nparts = args[:5]
+    out = args[5] if len(args) > 5 else None
+    if out and os.path.exists(out):
+        return pickle.load(open(out, "rb"))
+    good = enumerate_X(W, K, T, part=(part, nparts), keep=_admissible(K))
+    if out:
+        pickle.dump(good, open(out + ".tmp", "wb")); os.replace(out + ".tmp", out)
     return good
 
 
-def all_shapes(A, JA, K, secs, nproc=3, T=4.0, log=print):
+def all_shapes(A, JA, K, secs, nproc=3, T=4.0, log=print, partdir=None):
     """[(r, Tv, diag, off)] for the rank-2/3 sections and the full brick; non-free sections
     are returned separately."""
     import multiprocessing as mp
@@ -142,8 +149,10 @@ def all_shapes(A, JA, K, secs, nproc=3, T=4.0, log=print):
         W, ideals = steinitz_gram(A, JA, K); v = None
         log("brick is not free: Steinitz ideals %s" % ideals)
     t0 = time.time()
-    with mp.get_context("fork").Pool(nproc) as pool:
-        parts = pool.map(_shape_worker, [(W, K, T, p, 4 * nproc) for p in range(4 * nproc)])
+    NP = 48
+    pdir = (partdir or "/tmp") ; os.makedirs(pdir, exist_ok=True)
+    with mp.get_context("fork").Pool(nproc, maxtasksperchild=1) as pool:
+        parts = pool.map(_shape_worker, [(W, K, T, p, NP, os.path.join(pdir, "part_%02d.pkl" % p)) for p in range(NP)], chunksize=1)
     s4 = [s for p in parts for s in p]
     log("rank-4: %d shapes (%.0fs)" % (len(s4), time.time() - t0))
     shapes += [(4,) + s for s in s4]
@@ -151,10 +160,12 @@ def all_shapes(A, JA, K, secs, nproc=3, T=4.0, log=print):
 
 
 def classes(shapes, K, allowed, log=print):
-    """pair-type filter against P, then O_K-isometry classes."""
+    """pair-type filter against P, then O_K-isometry classes.  Memory-light: shapes stay plain
+    Python data; PARI objects live only inside the scoped helpers; representatives are kept
+    as strings.  Returns [(r, G, J)] with PARI G, J for the representatives."""
     N, t = _K(K)
     groups = collections.defaultdict(list); nf = [0]
-    def one(s):
+    def key_of(s):
         G, J = X_lattice(s[2], s[3], K)
         V = short_vectors(G, 4)
         if V.shape[1]:
@@ -163,21 +174,26 @@ def classes(shapes, K, allowed, log=print):
             a = V.T @ Gn @ V; c = V.T @ Gn @ (Jn @ V)
             codes = set(((2 * N * a - t * c) * 4096 + (2 * c - t * a)).ravel().tolist())
             if not codes <= allowed:
-                nf[0] += 1; return
-        key = (s[0], int(pari.matdet(G))) + tuple(int(c) for c in pari.qfrep(G, 10, 1))
-        groups[key].append((G, J))
+                return None
+        return (s[0], int(pari.matdet(G))) + tuple(int(c) for c in pari.qfrep(G, 10, 1))
     for s in shapes:
-        one(s)
-    nf = nf[0]
+        k = key_of(s)
+        if k is None:
+            nf[0] += 1
+        else:
+            groups[k].append((s[2], s[3]))
+    def reps_of(lst):
+        reps = []                                   # strings
+        for dg, off in lst:
+            G, J = X_lattice(dg, off, K)
+            if not any(herm_isom(G, J, pari(G2), pari(J2), K) for G2, J2 in reps):
+                reps.append((str(G), str(J)))
+        return reps
     out = []
     for key, lst in groups.items():
-        reps = []
-        for G, J in lst:
-            if not any(herm_isom(G, J, G2, J2, K) for G2, J2 in reps):
-                reps.append((G, J))
-        out += [(key[0], G, J) for G, J in reps]
-    log("pair-type filter removes %d; %d O_K-isometry classes %s" % (nf, len(out), dict(collections.Counter(c[0] for c in out))))
-    return out
+        out += [(key[0], G, J) for G, J in reps_of(lst)]
+    log("pair-type filter removes %d; %d O_K-isometry classes %s" % (nf[0], len(out), dict(collections.Counter(c[0] for c in out))))
+    return [(r, pari(G), pari(J)) for r, G, J in out]
 
 
 _G = {}
@@ -197,9 +213,14 @@ def brick_shapes(K, A, JA, cache, nproc=3, log=print):
     log("K = Q(sqrt(-%d)), h_K = %d, hmin(A) = %d; bounds det A_2 <= %.2f, det A_3 <= %.2f"
         % (C["D"], C["hK"], hminA, C["B"][2], C["B"][3]))
     t0 = time.time()
-    secs = sections(A, JA, K, C, hminA)
+    sfile = cache + ".sections"
+    if os.path.exists(sfile):
+        secs = {r: [(pari(G), pari(J)) for G, J in v] for r, v in pickle.load(open(sfile, "rb")).items()}
+    else:
+        secs = sections(A, JA, K, C, hminA)
+        pickle.dump({r: [(str(G), str(J)) for G, J in v] for r, v in secs.items()}, open(sfile, "wb"))
     log("sections: %d of rank 2, %d of rank 3 (%.0fs)" % (len(secs[2]), len(secs[3]), time.time() - t0))
-    shapes, nonfree, vecsA = all_shapes(A, JA, K, secs, nproc=nproc, log=log)
+    shapes, nonfree, vecsA = all_shapes(A, JA, K, secs, nproc=nproc, log=log, partdir=cache + ".parts")
     res = (shapes, nonfree, vecsA)
     pickle.dump(res, open(cache, "wb"))
     return res
