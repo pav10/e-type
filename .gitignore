@@ -5,3 +5,10 @@ results/*.pkl.parts/
 results/*.pkl.sections
 results/decide_*/
 results/exact_*/
+logs/kill_d20_4_111.log
+logs/brick_shapes_d20_b3.log
+logs/rank96b_d43_h4.log
+logs/group_d20.log
+logs/leech_d43.log
+logs/leech_d67.log
+# logs of running jobs; re-added with git add -f when they finish
