@@ -12,3 +12,4 @@ logs/group_d20.log
 logs/leech_d43.log
 logs/leech_d67.log
 # logs of running jobs; re-added with git add -f when they finish
+logs/transfer_d20_b4.log
