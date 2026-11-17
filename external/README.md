@@ -25,3 +25,19 @@ Findings
 7. Structure: the glued lattice is stable under ω = (1+√−7)/2 (a rank-48 Hermitian lattice), but it
    is not a tensor product E ⊗ P′ (its intersection with each E-block is J itself, index 7²⁴),
    so the exact tensor method of this repository does not apply.
+
+
+# External candidate 2: SRFP311T1 "Four-Leech graph-code gluing in dimension 96" (Nov 2026)
+
+Supplied by the user: manuscript `rank96_four_leech.pdf` and `verify_publication_core.py`.
+The manuscript itself does not claim extremality (shells 4, 6, 8 stated as open).
+
+- `four_leech_G96.txt` — their Gram matrix G, rebuilt by `scripts/four_leech_rebuild.py`
+  (data and construction copied verbatim from their script; their later checks omitted).
+  Checked: even, det 1, positive definite; their rootless certificate for P passes.
+- `four_leech_short_vector.txt` — a vector of norm **8** in G (coordinates in their basis),
+  found by BKZ-50 in 29 s; norm rechecked with plain Python integers.
+- `four_leech_norm8_tuple.txt` — the same vector in their four-Leech coordinates:
+  component P-norms (|a1|², |a2|², |b1|², |b2|²) = (12, 22, 10, 12), total 56,
+  b ≡ F a (mod 7), and (56)/7 = 8 by their formula (1.2).  This violates their
+  criterion (8.1) (total ≥ 70), so **min(L_F) = 8: the candidate is not extremal.**
